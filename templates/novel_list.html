@@ -1,0 +1,433 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小说网站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+        }
+                /* 添加下拉箭头指示器 */
+        .has-submenu > a::after {
+            content: '▼';
+            float: right;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .has-submenu.active > a::after {
+            content: '▲';
+        }
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 100vh;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #fff;
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            display: block;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+            border-radius: 4px;
+        }
+
+        /* 修改下拉菜单样式 */
+        .sidebar ul ul {
+            margin-left: 20px;
+            display: none;
+        }
+
+        /* 内容区域 */
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+            width: calc(100% - 270px);
+        }
+
+        .novel-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .novel {
+            width: 18%;
+            box-sizing: border-box;
+            margin: 0 2%;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .novel:hover {
+            transform: scale(1.05);
+        }
+
+        .novel img {
+            width: 80%;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .novel-info {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .novel-info h3 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .novel-info p {
+            margin: 10px 0;
+            font-size: 1em;
+            color: #888;
+        }
+
+        .status {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .author {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 16px;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .pagination a.active {
+            background-color: #0056b3;
+        }
+
+        .pagination a:hover {
+            background-color: #0056b3;
+        }
+
+        .page-labels {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .page-labels a {
+            margin: 0 3px;
+            padding: 6px 12px;
+            background-color: #e9ecef;
+            color: #007bff;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .page-labels a.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <ul>
+            <li><a href="{% url 'novel_list' %}">首页</a></li>
+            <!-- 修改推荐菜单部分 -->
+            <li class="has-submenu">
+                <a href="#" onclick="toggleSubmenu(this, event)">推荐</a>
+                <ul>
+                    <!-- 特殊处理类型 -->
+                    <li><a href="{% url 'recommended_novels_by_type' '科幻末世' %}">科幻末世</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '游戏体育' %}">游戏体育</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '悬疑脑洞' %}">悬疑脑洞</a></li>
+                    
+                    <!-- 男频类型 -->
+                    <li><a href="{% url 'recommended_novels_by_type' '都市日常' %}">都市日常</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '都市修真' %}">都市修真</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '都市高武' %}">都市高武</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '奇幻仙侠' %}">奇幻仙侠</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '历史古代' %}">历史古代</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '战神赘婿' %}">战神赘婿</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '都市种田' %}">都市种田</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '传统玄幻' %}">传统玄幻</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '历史脑洞' %}">历史脑洞</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '都市脑洞' %}">都市脑洞</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '玄幻脑洞' %}">玄幻脑洞</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '悬疑灵异' %}">悬疑灵异</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '抗战谍战' %}">抗战谍战</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '动漫衍生' %}">动漫衍生</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '男频衍生' %}">男频衍生</a></li>
+            
+                    <!-- 女频类型 -->
+                    <li><a href="{% url 'recommended_novels_by_type' '女频衍生' %}">女频衍生</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '玄幻言情' %}">玄幻言情</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '种田' %}">种田</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '年代' %}">年代</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '现言脑洞' %}">现言脑洞</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '宫斗宅斗' %}">宫斗宅斗</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '古言脑洞' %}">古言脑洞</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '医术' %}">医术</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '快穿' %}">快穿</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '青春甜宠' %}">青春甜宠</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '星光璀璨' %}">星光璀璨</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '悬疑恋爱' %}">悬疑恋爱</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '职场婚恋' %}">职场婚恋</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '豪门总裁' %}">豪门总裁</a></li>
+                    <li><a href="{% url 'recommended_novels_by_type' '民国言情' %}">民国言情</a></li>
+                </ul>
+            </li>
+            <li class="has-submenu">
+                <a href="#" onclick="toggleSubmenu(this, event)">榜单</a>
+            <ul>
+                <!-- 男频阅读榜 -->
+                <li class="has-submenu">
+                        <a href="#" onclick="toggleSubmenu(this, event)">男频阅读榜</a>
+                    <ul>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '科幻末世' %}">科幻末世</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '都市日常' %}">都市日常</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '都市修真' %}">都市修真</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '都市高武' %}">都市高武</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '奇幻仙侠' %}">奇幻仙侠</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '历史古代' %}">历史古代</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '战神赘婿' %}">战神赘婿</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '都市种田' %}">都市种田</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '传统玄幻' %}">传统玄幻</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '历史脑洞' %}">历史脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '悬疑脑洞' %}">悬疑脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '都市脑洞' %}">都市脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '玄幻脑洞' %}">玄幻脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '悬疑灵异' %}">悬疑灵异</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '抗战谍战' %}">抗战谍战</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '游戏体育' %}">游戏体育</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '动漫衍生' %}">动漫衍生</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频阅读榜' '男频衍生' %}">男频衍生</a></li>
+                    </ul>
+                </li>
+
+                <!-- 男频新书榜 -->
+                <li class="has-submenu">
+                        <a href="#" onclick="toggleSubmenu(this, event)">男频新书榜</a>
+                    <ul>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '科幻末世' %}">科幻末世</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '都市日常' %}">都市日常</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '都市修真' %}">都市修真</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '都市高武' %}">都市高武</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '奇幻仙侠' %}">奇幻仙侠</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '历史古代' %}">历史古代</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '战神赘婿' %}">战神赘婿</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '都市种田' %}">都市种田</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '传统玄幻' %}">传统玄幻</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '历史脑洞' %}">历史脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '悬疑脑洞' %}">悬疑脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '都市脑洞' %}">都市脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '玄幻脑洞' %}">玄幻脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '悬疑灵异' %}">悬疑灵异</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '抗战谍战' %}">抗战谍战</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '游戏体育' %}">游戏体育</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '动漫衍生' %}">动漫衍生</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '男频新书榜' '男频衍生' %}">男频衍生</a></li>
+                    </ul>
+                </li>
+
+                <!-- 女频阅读榜 -->
+                <li class="has-submenu">
+                        <a href="#" onclick="toggleSubmenu(this, event)">女频阅读榜</a>
+                    <ul>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '科幻末世' %}">科幻末世</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '游戏体育' %}">游戏体育</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '女频衍生' %}">女频衍生</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '玄幻言情' %}">玄幻言情</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '种田' %}">种田</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '年代' %}">年代</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '现言脑洞' %}">现言脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '宫斗宅斗' %}">宫斗宅斗</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '悬疑脑洞' %}">悬疑脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '古言脑洞' %}">古言脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '医术' %}">医术</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '快穿' %}">快穿</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '青春甜宠' %}">青春甜宠</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '星光璀璨' %}">星光璀璨</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '悬疑恋爱' %}">悬疑恋爱</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '职场婚恋' %}">职场婚恋</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '豪门总裁' %}">豪门总裁</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频阅读榜' '民国言情' %}">民国言情</a></li>
+                    </ul>
+                </li>
+
+                <!-- 女频新书榜 -->
+                <li class="has-submenu">
+                        <a href="#" onclick="toggleSubmenu(this, event)">女频新书榜</a>
+                    <ul>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '科幻末世' %}">科幻末世</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '游戏体育' %}">游戏体育</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '女频衍生' %}">女频衍生</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '玄幻言情' %}">玄幻言情</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '种田' %}">种田</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '年代' %}">年代</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '现言脑洞' %}">现言脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '宫斗宅斗' %}">宫斗宅斗</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '悬疑脑洞' %}">悬疑脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '古言脑洞' %}">古言脑洞</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '医术' %}">医术</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '快穿' %}">快穿</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '青春甜宠' %}">青春甜宠</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '星光璀璨' %}">星光璀璨</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '悬疑恋爱' %}">悬疑恋爱</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '职场婚恋' %}">职场婚恋</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '豪门总裁' %}">豪门总裁</a></li>
+                        <li><a href="{% url 'novel_list_by_list_and_type' '女频新书榜' '民国言情' %}">民国言情</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            </li>
+            <li class="has-submenu">
+                <a href="#" onclick="toggleSubmenu(this, event)">分析</a>
+                <ul>
+                    <li><a href="{% url 'novel_people_statistics' %}">读者人数分布</a></li>
+                    <li><a href="{% url 'novel_type_statistics' %}">类型分布</a></li>
+                    <li><a href="{% url 'novel_chapter_statistics' %}">章节数分布</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content">
+        <div class="novel-container">
+            {% for novel in page_obj %}
+            <div class="novel">
+                <img src="{{ novel.img }}" alt="{{ novel.title }}">
+                <div class="novel-info">
+                    <h3>{{ novel.title }}</h3>
+                    <p>&nbsp</p>
+                </div>
+                <div class="status">{{ novel.status }}</div> <!-- 显示状态 -->
+                <div class="author">{{ novel.author }}</div> <!-- 显示作者 -->
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; 首页</a>
+                <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+            {% endif %}
+
+            <div class="page-labels" style="margin-top: -5px;">
+                {% for i in page_obj.paginator.page_range %}
+                    {% if page_obj.number < 10 %}
+                        {% if i <= 10 %}
+                            <a href="?page={{ i }}" class="{% if i == page_obj.number %}active{% endif %}">{{ i }}</a>
+                        {% endif %}
+                    {% else %}
+                        {% with start=page_obj.number|add:"-1"|divisibleby:"10"|yesno:"10,"|default:page_obj.number|add:"-1" %}
+                            {% if i >= start and i < start|add:"10" %}
+                                <a href="?page={{ i }}" class="{% if i == page_obj.number %}active{% endif %}">{{ i }}</a>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">尾页 &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        function toggleSubmenu(element, event) {
+            event.preventDefault();
+            const parent = element.parentElement;
+            const submenu = parent.querySelector('ul');
+            
+            // 切换当前菜单的显示状态
+            if (submenu) {
+                submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+                parent.classList.toggle('active');
+            }
+        }
+
+        // 初始化所有具有子菜单的项
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.sidebar li');
+            menuItems.forEach(item => {
+                const submenu = item.querySelector('ul');
+                if (submenu) {
+                    item.classList.add('has-submenu');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

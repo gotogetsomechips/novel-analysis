@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+  <title>Novel Chapter Statistics</title>
+  <script type="text/javascript" src="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js"></script>
+</head>
+<body style="height: 100%; margin: 0">
+  <!-- 返回首页按钮 -->
+  <button onclick="window.location.href='{% url 'novel_list' %}'" 
+          style="position: absolute; top: 20px; left: 10px; padding: 10px 20px; background-color: #007bff   ; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9999;">
+    返回首页
+  </button>
+
+  <div id="container" style="height: 100%"></div>
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+
+    var option = {
+      title: {
+        text: '小说章节数统计',
+        subtext: '',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item'
+      },
+      xAxis: {
+        type: 'category',
+        data: {{ legend_data|safe }}  // 传递的区间标签
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          data: {{ series_data|safe }},  // 传递的每个区间的数据
+          type: 'line',
+          smooth: true,  // 平滑曲线
+          lineStyle: {
+            width: 3
+          },
+          itemStyle: {
+            borderWidth: 5
+          }
+        }
+      ]
+    };
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+
+</body>
+</html>

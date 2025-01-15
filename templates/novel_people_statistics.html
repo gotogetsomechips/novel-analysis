@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <!-- 返回首页按钮 -->
+  <button onclick="window.location.href='{% url 'novel_list' %}'"
+          style="position: absolute; top: 10px; left: 10px; padding: 10px 20px; background-color: #007bff   ; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9999;">
+    返回首页
+  </button>
+  <div id="container" style="height: 100%"></div>
+
+  <script type="text/javascript" src="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js"></script>
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+
+    var option;
+
+    // 从 Django 模板中传递的变量
+    const legendData = {{ legend_data|safe }};
+    const seriesData = {{ series_data|safe }};
+
+    option = {
+      title: {
+        text: '观看人数统计',
+        subtext: '',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b} : {c} '
+      },
+      xAxis: {
+        type: 'category',
+        data: legendData // 横坐标显示区间
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '观看人数区间',
+          type: 'bar', // 使用柱状图
+          data: seriesData.map(item => item.value), // 数据值
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+      ]
+    };
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+</html>
